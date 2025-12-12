@@ -229,11 +229,19 @@ def synthesis_node(state: FinancialState):
         # Convert back to dict for state storage
         report_dict = parsed_report.dict()
         
-        
+        final_report = (
+            f"**Recommendation:** {report_dict['recommendation']}\n"
+            f"**Risk Level:** {report_dict['risk_level']}\n\n"
+            f"**Reasoning:**\n{report_dict['reasoning']}\n\n"
+            f"**Key Drivers:**\n- " + "\n- ".join(report_dict['key_drivers'])
+        )
+
         print(f"--- [Agent 4] Structured Report Generated! ---")
         
+        report_dict["final_report"] = final_report
+
         return report_dict
-        
+
     except Exception as e:
         print(f"Error calling LLM or Parsing: {e}")
         return {

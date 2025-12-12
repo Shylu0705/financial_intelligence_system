@@ -61,6 +61,11 @@ def run_financial_analysis(ticker: str):
         "fundamental_metrics": final_state.get("fundamental_metrics"),
         "technical_indicators": final_state.get("technical_indicators"),
         "risk_metrics": final_state.get("risk_metrics"),
+        "final_report": final_state.get("final_report"),
+        "recommendation":final_state.get("recommendation"),
+        "risk_level": final_state.get("risk_level"),
+        "readoning": final_state.get("reasoning"),
+        "Key_drivers": final_state.get("key_drivers"),
         "final_report": final_state.get("final_report")
     }
       
@@ -68,21 +73,3 @@ def run_financial_analysis(ticker: str):
     print("=" * 50)
     
     return output_data
-
-# --- Entry Point ---
-# if __name__ == "__main__":
-#     # Example Usage
-#     ticker_symbol = "NVDA"  # Try changing to any other NYSE ticker
-#     result = run_financial_analysis(ticker_symbol)
-    
-#     # Print the report part to console for verification
-#     print("\n--- EXECUTIVE SUMMARY ---")
-
-#     # Create a clean string version for the final report text
-#     formatted_text = (
-#         f"**Recommendation:** {result['recommendation']}\n"
-#         f"**Risk Level:** {result['risk_level']}\n\n"
-#         f"**Reasoning:**\n{result['reasoning']}\n\n"
-#         f"**Key Drivers:**\n- " + "\n- ".join(result['key_drivers'])
-#     )
-#     print(formatted_text)

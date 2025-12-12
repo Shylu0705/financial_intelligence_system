@@ -7,10 +7,4 @@ if __name__ == "__main__":
     
     print("\n--- EXECUTIVE SUMMARY ---")
 
-    formatted_text = (
-        f"**Recommendation:** {result['recommendation']}\n"
-        f"**Risk Level:** {result['risk_level']}\n\n"
-        f"**Reasoning:**\n{result['reasoning']}\n\n"
-        f"**Key Drivers:**\n- " + "\n- ".join(result['key_drivers'])
-    )
-    print(formatted_text)
+    print(result['final_report'])
