@@ -64,7 +64,7 @@ def run_financial_analysis(ticker: str):
         "final_report": final_state.get("final_report"),
         "recommendation":final_state.get("recommendation"),
         "risk_level": final_state.get("risk_level"),
-        "readoning": final_state.get("reasoning"),
+        "reasoning": final_state.get("reasoning"),
         "Key_drivers": final_state.get("key_drivers"),
         "final_report": final_state.get("final_report")
     }

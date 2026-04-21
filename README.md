@@ -64,7 +64,15 @@ python fis_api.py
 The API will be available at `http://127.0.0.1:8000`. You can also access the interactive API documentation at:
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
+#### Streamlit Frontend
 
+A Streamlit frontend is included in `app.py` and calls the API endpoint at `http://127.0.0.1:8000/analyze`.
+
+Start the frontend in a separate terminal after launching the API:
+
+```bash
+streamlit run app.py
+```
 #### API Endpoint
 
 **POST** `/analyze`
