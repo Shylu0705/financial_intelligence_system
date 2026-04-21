@@ -1,172 +1,77 @@
-# Financial Intelligence System
+# FinLens: Multi-Agent Financial Intelligence System
 
-A multi-agent financial analysis system that provides real-time stock analysis and trading recommendations for NYSE-listed stocks. The system uses LangGraph to orchestrate a pipeline of specialized agents that perform data ingestion, technical analysis, risk assessment, and AI-powered synthesis.
+## Problem Statement
+Traditional retail trading platforms provide raw data but lack **automated synthesis**. Independent traders, such as my parents, spend hours manually cross-referencing technical indicators and news sentiment. This manual process is slow and prone to information overload. **FinLens** solves this by automating the "analyst" role. Success is defined as reducing a 30-minute research session into a 15-second "peer-reviewed" report, providing traders with structured, evidence-based recommendations.
 
-## Features
+## Solution Overview
+FinLens is a decoupled AI system that utilizes a multi-agent workflow to evaluate market assets. It consists of a **FastAPI backend** managing agentic logic and a **Streamlit frontend** for user interaction.
+* **AI's Core Role:** AI is central to the functionality, performing non-linear data interpretation that non-AI systems cannot achieve. 
+* **The AI Advantage:** Unlike a static dashboard, the AI component cross-references contradictory signals between agents (e.g., bullish technicals vs. bearish sentiment) to provide a reasoned final synthesis.
 
-- **Data Ingestion**: Fetches 5 years of historical stock data using yfinance
-- **Technical Analysis**: Calculates RSI (Relative Strength Index) and MACD (Moving Average Convergence Divergence) indicators
-- **Fundamental Analysis**: Retrieves key metrics including P/E ratio, market cap, and sector information
-- **Risk Assessment**: Computes volatility, Sharpe ratio, maximum drawdown, and current drawdown
-- **AI-Powered Recommendations**: Uses Google Gemini AI to synthesize analysis and generate BUY/SELL/HOLD recommendations with detailed reasoning
+## AI Integration
+* **Agentic Patterns:** Built using **LangGraph** to manage state across a directed acyclic graph (DAG). This allows specialized nodes—Technical, Sentiment, and Portfolio—to work collaboratively.
+* **Models & APIs:** Utilizes **Gemini 1.5 Pro** for its high-reasoning capabilities and large context window.
+* **Tradeoffs:** I prioritized **accuracy and reliability** over latency by implementing **Pydantic** for structured tool use. While schema validation adds slight overhead, it ensures the LLM produces production-ready data rather than hallucinations.
 
-## Prerequisites
+## Architecture / Design Decisions
+* **Decoupled Stack:** The system is split into an **Agent API (FastAPI)** and a **UI (Streamlit)** to allow for independent scaling and modularity.
+* **State Management:** I used a centralized `AgentState` in LangGraph to ensure data consistency as the "Lead Analyst" coordinates between nodes.
+* **Assumption:** The design assumes real-time internet access for the `yfinance` tool to provide "ground truth" data to the agents.
 
-- Python 3.8 or higher
-- Google Gemini API key (for AI synthesis)
+## What did AI help you do faster, and where did it get in your way?
+* **Acceleration:** I used **Cursor and Claude 3.5 Sonnet** to rapidly prototype the complex LangGraph state transitions and FastAPI endpoints. This shifted my focus from syntax debugging to high-level system design.
+* **Limitations:** The AI coding tools occasionally struggled with the specific library edge cases of `yfinance`. I had to manually implement robust error handling for market-closed scenarios where the LLM’s training data was insufficient.
 
-## Installation
+---
 
-1. Clone the repository:
+## Getting Started / Setup Instructions
+
+### Prerequisites
+* Python 3.10+
+* A **Google Gemini API Key** (for LLM reasoning)
+* Two terminal windows (one for the API, one for the UI)
+
+### Installation & Environment
 ```bash
+# Clone the repository
+git clone https://github.com/Shylu0705/financial_intellligence_system.git
 cd financial_intellligence_system
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Open .env and add your GOOGLE_API_KEY
 ```
 
-3. Create a `.env` file in the project root directory:
-```bash
-# .env
-GOOGLE_API_KEY=your_google_gemini_api_key_here
-```
+### Execution Flow
+To run the system, you must start the backend API **before** the frontend.
 
-**Note**: You can obtain a Google Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey).
-
-## Usage
-
-### Command-Line Interface
-
-Run the analysis for any NYSE ticker symbol:
-
-```bash
-python test.py
-```
-
-When prompted, enter a ticker symbol (e.g., `AMZN`, `GOOG`, `TSLA`, `AAPL`, `ORCL`, `MSFT`, `NVDA`).
-
-The system will:
-1. Fetch historical data for the ticker
-2. Perform technical and fundamental analysis
-3. Calculate risk metrics
-4. Generate an AI-powered recommendation with reasoning
-
-### API Interface
-
-Start the FastAPI server:
-
+**Step 1: Start the FIS Agent API**
+In your first terminal, launch the FastAPI server:
 ```bash
 python fis_api.py
 ```
 
-The API will be available at `http://127.0.0.1:8000`. You can also access the interactive API documentation at:
-- Swagger UI: `http://127.0.0.1:8000/docs`
-- ReDoc: `http://127.0.0.1:8000/redoc`
-#### Streamlit Frontend
-
-A Streamlit frontend is included in `app.py` and calls the API endpoint at `http://127.0.0.1:8000/analyze`.
-
-Start the frontend in a separate terminal after launching the API:
-
+**Step 2: Start the Streamlit UI**
+In your second terminal, launch the frontend:
 ```bash
 streamlit run app.py
 ```
-#### API Endpoint
 
-**POST** `/analyze`
+## Usage
+1.  Navigate to the local Streamlit URL (usually `localhost:8501`).
+2.  **Market Analysis:** Enter a ticker (e.g., `AAPL`) to trigger the agentic workflow.
+3.  **Comparison Tab:** Add multiple tickers to see a side-by-side agentic evaluation.
+4.  **Portfolio:** Track your holdings and view AI-generated risk assessments based on current market state.
 
-Analyzes a stock ticker and returns comprehensive financial analysis.
+---
 
-**Request Body:**
-```json
-{
-  "ticker": "AAPL"
-}
-```
+## Testing / Error Handling
+* **Failure Modes:** Evaluated how the system handles invalid tickers or empty news feeds. 
+* **Graceful Degradation:** If one agent fails (e.g., Sentiment API timeout), the Lead Analyst is programmed to proceed with a "Limited Data" warning rather than crashing the entire pipeline.
 
-**Response (200 OK):**
-```json
-{
-  "ticker": "AAPL",
-  "analysis_date": "2024-01-15 14:30:00",
-  "data_range": {
-    "start": "2019-01-15",
-    "end": "2024-01-15"
-  },
-  "fundamental_metrics": {
-    "market_cap": 3000000000000,
-    "pe_ratio": 28.5,
-    "forward_pe": 25.2,
-    "sector": "Technology"
-  },
-  "technical_indicators": {
-    "current_price": 185.50,
-    "rsi_14": 65.3,
-    "macd_line": 2.15,
-    "signal_line": 1.89,
-    "trend": "Bullish"
-  },
-  "risk_metrics": {
-    "max_drawdown": -0.25,
-    "current_drawdown": -0.02,
-    "volatility": 0.18,
-    "sharpe_ratio": 1.45
-  },
-  "recommendation": "BUY",
-  "risk_level": "Medium",
-  "reasoning": "Strong technical indicators with bullish MACD trend and reasonable valuation...",
-  "key_drivers": [
-    "Bullish MACD trend",
-    "RSI of 65.3 indicating healthy momentum",
-    "Current drawdown of -2% showing recent recovery",
-    "Sharpe ratio of 1.45 indicating good risk-adjusted returns"
-  ],
-  "final_report": "Full detailed report text..."
-}
-```
-
-**Error Responses:**
-
-- **400 Bad Request**: Invalid or empty ticker symbol
-  ```json
-  {
-    "detail": "Ticker symbol cannot be empty"
-  }
-  ```
-
-- **404 Not Found**: No data found for the ticker
-  ```json
-  {
-    "detail": "No data found for ticker 'INVALID'"
-  }
-  ```
-
-- **500 Internal Server Error**: Server-side error during analysis
-  ```json
-  {
-    "detail": "Error message"
-  }
-  ```
-
-#### Example API Usage
-
-Using `curl`:
-```bash
-curl -X POST "http://127.0.0.1:8000/analyze" \
-     -H "Content-Type: application/json" \
-     -d '{"ticker": "AAPL"}'
-```
-
-Using Python `requests`:
-```python
-import requests
-
-response = requests.post(
-    "http://127.0.0.1:8000/analyze",
-    json={"ticker": "AAPL"}
-)
-result = response.json()
-print(result["recommendation"])
-```
+## Future Improvements / Stretch Goals
+* **Multimodal Vision:** Feeding actual technical chart images into the model to mimic a human trader's visual pattern recognition.
+* **Backtesting Integration:** Building a module to test the AI's "Buy/Sell" signals against historical performance data.
